@@ -1,16 +1,14 @@
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
-from django.contrib.auth import get_user_model, login, authenticate
+from django.views.generic import TemplateView, CreateView
+from django.contrib.auth import login, authenticate
 from .forms import SignUpForm
 
-CustomUser = get_user_model()
 
 # Create your views here.
 class SignUpView(CreateView):
-    model = CustomUser
     template_name = "account/sign_up.html"
     form_class = SignUpForm
-    success_url = reverse_lazy("index")
+    success_url = reverse_lazy("accounts:home")
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -21,3 +19,7 @@ class SignUpView(CreateView):
         if user is not None:
             login(self.request, user)
             return response
+
+
+class HomeView(TemplateView):
+    template_name = "accounts/home.html"
