@@ -7,8 +7,6 @@ CustomUser = get_user_model()
 
 
 class SignUpForm(UserCreationForm):
-    email = forms.CharField()
-
     class Meta:
         model = CustomUser
         fields = (
