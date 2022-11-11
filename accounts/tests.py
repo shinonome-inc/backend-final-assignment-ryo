@@ -1,15 +1,52 @@
 from django.test import TestCase
+from django.urls import reverse
+
+from django.contrib.auth import get_user_model, SESSION_KEY
+
+CustomUser = get_user_model()
 
 
 class TestSignUpView(TestCase):
+    def setUp(self):
+        self.url = reverse("accounts:signup")
+
     def test_success_get(self):
-        pass
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/signup.html")
 
     def test_success_post(self):
-        pass
+        user = {
+            "username": "testuser",
+            "email": "test@test.com",
+            "password1": "testpassword",
+            "password2": "testpassword",
+        }
+        response = self.client.post(self.url, user)
+        self.assertTrue(
+            CustomUser.objects.filter(
+                username="testuser", email="test@test.com"
+            ).exists()
+        )
+        self.assertRedirects(
+            response,
+            reverse("acconts:home"),
+            status_code=302,
+            target_status_code=200,
+            msg_prefix="",
+            fetch_redirect_response=True,
+        )
+        self.assertIn(SESSION_KEY, self.client.session)
 
     def test_failure_post_with_empty_form(self):
-        pass
+        empty_user = {
+            "username": "",
+            "email": "",
+            "password1": "",
+            "password2": "",
+        }
+        response = self.client.post(self.url, empty_user)
+        self.assertEqual(response.status_code, 200)
 
     def test_failure_post_with_empty_username(self):
         pass
