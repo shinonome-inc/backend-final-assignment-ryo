@@ -1,7 +1,8 @@
+from django.contrib.auth import SESSION_KEY, get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from django.contrib.auth import get_user_model, SESSION_KEY
+from .forms import SignUpForm
 
 CustomUser = get_user_model()
 
@@ -47,6 +48,9 @@ class TestSignUpView(TestCase):
         }
         response = self.client.post(self.url, empty_user)
         self.assertEqual(response.status_code, 200)
+        form = SignUpForm(empty_user)
+        self.assertFalse(form.is_valid())
+        self.assertFalse(CustomUser.objects.exists())
 
     def test_failure_post_with_empty_username(self):
         pass
