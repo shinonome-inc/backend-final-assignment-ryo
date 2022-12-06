@@ -1,9 +1,15 @@
 from django.test import TestCase
+from django.urls import reverse
 
 
 class TestHomeView(TestCase):
+    def setUp(self):
+        self.url = reverse("tweets:home")
+
     def test_success_get(self):
-        pass
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "tweets/home.html")
 
 
 class TestTweetCreateView(TestCase):
