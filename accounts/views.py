@@ -1,11 +1,14 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
+from django.http import HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login, authenticate
-from .forms import SignUpForm
+from django.contrib.auth.views import LoginView, LogoutView
+from .forms import SignUpForm, LoginForm
 
 
 # Create your views here.
-class SignUpView(CreateView):
+class UserSignUpView(CreateView):
     template_name = "accounts/signup.html"
     form_class = SignUpForm
     success_url = reverse_lazy("tweets:home")
@@ -19,3 +22,14 @@ class SignUpView(CreateView):
         if user is not None:
             login(self.request, user)
             return response
+        else:
+            return HttpResponse("もう一度やり直してください")
+
+
+class UserLoginView(LoginView):
+    form_class = LoginForm
+    template_name = "accounts/login.html"
+
+
+class UserLogoutView(LoginRequiredMixin, LogoutView):
+    template_name = "accounts/logout.html"

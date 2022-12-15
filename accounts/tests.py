@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model, SESSION_KEY
 from django.test import TestCase
 from django.urls import reverse
 
+from mysite import settings
 from .forms import SignUpForm
 
 CustomUser = get_user_model()
@@ -184,8 +185,18 @@ class TestSignUpView(TestCase):
 
 
 class TestLoginView(TestCase):
+    def setUp(self):
+        self.url = reverse("accounts:login")
+        self.user = CustomUser.objects.create_user(
+            username="testuser",
+            email="test@test.com",
+            password="testpassword",
+        )
+
     def test_success_get(self):
-        pass
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/login.html")
 
     def test_success_post(self):
         pass
@@ -198,8 +209,26 @@ class TestLoginView(TestCase):
 
 
 class TestLogoutView(TestCase):
+    def setUp(self):
+        self.url = reverse("accounts:logout")
+        self.user = CustomUser.objects.create_user(
+            username="testuser",
+            email="test@test.com",
+            password="testpassword",
+        )
+
     def test_success_get(self):
-        pass
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertRedirects(
+            response,
+            reverse(settings.LOGOUT_REDIRECT_URL),
+            status_code=302,
+            target_status_code=200,
+            msg_prefix="",
+            fetch_redirect_response=True,
+        )
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
 
 class TestUserProfileView(TestCase):

@@ -1,12 +1,21 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+
+CustomUser = get_user_model()
 
 
 class TestHomeView(TestCase):
     def setUp(self):
         self.url = reverse("tweets:home")
+        self.user = CustomUser.objects.create_user(
+            username="testuser",
+            email="test@test.com",
+            password="testpassword",
+        )
 
     def test_success_get(self):
+        self.client.force_login(self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "tweets/home.html")
