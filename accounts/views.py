@@ -1,7 +1,6 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.http import HttpResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.views import LoginView, LogoutView
 from .forms import SignUpForm, LoginForm
@@ -31,5 +30,5 @@ class UserLoginView(LoginView):
     template_name = "accounts/login.html"
 
 
-class UserLogoutView(LoginRequiredMixin, LogoutView):
+class UserLogoutView(LogoutView):
     template_name = "accounts/logout.html"
