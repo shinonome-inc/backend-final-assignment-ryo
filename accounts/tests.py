@@ -197,8 +197,9 @@ class TestLoginView(TestCase):
         self.assertTemplateUsed(response, "accounts/login.html")
 
     def test_success_post(self):
-        user = {"username": "testuser", "password": "testpassword"}
-        response = self.client.post(self.url, user)
+        user_data = {"username": "testuser", "password": "testpassword"}
+        response = self.client.post(self.url, user_data)
+        self.assertEqual(response.context["username"], "testuser")
         self.assertRedirects(
             response,
             reverse(settings.LOGIN_REDIRECT_URL),
@@ -208,11 +209,11 @@ class TestLoginView(TestCase):
         self.assertIn(SESSION_KEY, self.client.session)
 
     def test_failure_post_with_not_exists_user(self):
-        not_exist_user = {
+        not_exist_user_data = {
             "username": "fakeuser",
             "password": "fakepassward",
         }
-        response = self.client.post(self.url, not_exist_user)
+        response = self.client.post(self.url, not_exist_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertFalse(form.is_valid())
@@ -223,11 +224,11 @@ class TestLoginView(TestCase):
         self.assertNotIn(SESSION_KEY, self.client.session)
 
     def test_failure_post_with_empty_password(self):
-        password_empty_user = {
+        password_empty_user_data = {
             "username": "testuser",
             "password": "",
         }
-        response = self.client.post(self.url, password_empty_user)
+        response = self.client.post(self.url, password_empty_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertFalse(form.is_valid())
@@ -243,17 +244,15 @@ class TestLogoutView(TestCase):
             email="test@test.com",
             password="testpassword",
         )
+        self.client.login(username="testuser", password="testpassword")
 
     def test_success_get(self):
-        self.client.force_login(self.user)
         response = self.client.get(self.url)
         self.assertRedirects(
             response,
             reverse(settings.LOGOUT_REDIRECT_URL),
             status_code=302,
             target_status_code=200,
-            msg_prefix="",
-            fetch_redirect_response=True,
         )
         self.assertNotIn(SESSION_KEY, self.client.session)
 
