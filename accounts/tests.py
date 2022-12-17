@@ -3,7 +3,6 @@ from django.test import TestCase
 from django.urls import reverse
 
 from mysite import settings
-from .forms import SignUpForm
 
 CustomUser = get_user_model()
 
@@ -18,18 +17,20 @@ class TestSignUpView(TestCase):
         self.assertTemplateUsed(response, "accounts/signup.html")
 
     def test_success_post(self):
-        user = {
+        user_data = {
             "username": "testuser",
             "email": "test@test.com",
             "password1": "testpassword",
             "password2": "testpassword",
         }
-        response = self.client.post(self.url, user)
+        self.assertFalse(CustomUser.objects.exists())
+        response = self.client.post(self.url, user_data)
         self.assertTrue(
             CustomUser.objects.filter(
                 username="testuser", email="test@test.com"
             ).exists()
         )
+        self.assertEqual(CustomUser.objects.all().count(), 1)
         self.assertRedirects(
             response,
             reverse(settings.LOGIN_REDIRECT_URL),
@@ -39,39 +40,39 @@ class TestSignUpView(TestCase):
         self.assertIn(SESSION_KEY, self.client.session)
 
     def test_failure_post_with_empty_form(self):
-        empty_user = {
+        empty_user_data = {
             "username": "",
             "email": "",
             "password1": "",
             "password2": "",
         }
-        response = self.client.post(self.url, empty_user)
+        response = self.client.post(self.url, empty_user_data)
         self.assertEqual(response.status_code, 200)
-        form = SignUpForm(empty_user)
+        form = response.context["form"]
         self.assertFalse(form.is_valid())
         self.assertFalse(CustomUser.objects.exists())
 
     def test_failure_post_with_empty_username(self):
-        username_empty_user = {
+        username_empty_user_data = {
             "username": "",
             "email": "test@test.com",
             "password1": "testpassword",
             "password2": "testpassword",
         }
-        response = self.client.post(self.url, username_empty_user)
+        response = self.client.post(self.url, username_empty_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertEqual(form.errors["username"], ["このフィールドは必須です。"])
         self.assertFalse(CustomUser.objects.exists())
 
     def test_failure_post_with_empty_email(self):
-        email_empty_user = {
+        email_empty_user_data = {
             "username": "testuser",
             "email": "",
             "password1": "testpassword",
             "password2": "testpassword",
         }
-        response = self.client.post(self.url, email_empty_user)
+        response = self.client.post(self.url, email_empty_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
 
@@ -80,13 +81,13 @@ class TestSignUpView(TestCase):
         self.assertFalse(CustomUser.objects.exists())
 
     def test_failure_post_with_empty_password(self):
-        password_empty_user = {
+        password_empty_user_data = {
             "username": "testuser",
             "email": "test@test.com",
             "password1": "",
             "password2": "",
         }
-        response = self.client.post(self.url, password_empty_user)
+        response = self.client.post(self.url, password_empty_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertEqual(form.errors["password1"], ["このフィールドは必須です。"])
@@ -94,7 +95,7 @@ class TestSignUpView(TestCase):
         self.assertFalse(CustomUser.objects.exists())
 
     def test_failure_post_with_duplicated_user(self):
-        duplicated_user = {
+        duplicated_user_data = {
             "username": "testuser",
             "email": "test2@test.com",
             "password1": "testpassword",
@@ -106,7 +107,7 @@ class TestSignUpView(TestCase):
             email="test@test.com",
             password="testpassword",
         )
-        response = self.client.post(self.url, duplicated_user)
+        response = self.client.post(self.url, duplicated_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertEqual(form.errors["username"], ["同じユーザー名が既に登録済みです。"])
@@ -117,65 +118,65 @@ class TestSignUpView(TestCase):
         )
 
     def test_failure_post_with_invalid_email(self):
-        email_failure_user = {
+        email_failure_user_data = {
             "username": "testuser",
             "email": "test",
             "password1": "testpassword",
             "password2": "testpassword",
         }
-        response = self.client.post(self.url, email_failure_user)
+        response = self.client.post(self.url, email_failure_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertEqual(form.errors["email"], ["有効なメールアドレスを入力してください。"])
         self.assertFalse(CustomUser.objects.exists())
 
     def test_failure_post_with_too_short_password(self):
-        password_failure_user = {
+        password_failure_user_data = {
             "username": "testuser",
             "email": "test@test.com",
             "password1": "short",
             "password2": "short",
         }
-        response = self.client.post(self.url, password_failure_user)
+        response = self.client.post(self.url, password_failure_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertEqual(form.errors["password2"], ["このパスワードは短すぎます。最低 8 文字以上必要です。"])
         self.assertFalse(CustomUser.objects.exists())
 
     def test_failure_post_with_password_similar_to_username(self):
-        password_failure_user = {
+        password_failure_user_data = {
             "username": "testuser",
             "email": "test@test.com",
             "password1": "testuser",
             "password2": "testuser",
         }
-        response = self.client.post(self.url, password_failure_user)
+        response = self.client.post(self.url, password_failure_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertEqual(form.errors["password2"], ["このパスワードは ユーザー名 と似すぎています。"])
         self.assertFalse(CustomUser.objects.exists())
 
     def test_failure_post_with_only_numbers_password(self):
-        password_failure_user = {
+        password_failure_user_data = {
             "username": "testuser",
             "email": "test@test.com",
             "password1": "12435678",
             "password2": "12435678",
         }
-        response = self.client.post(self.url, password_failure_user)
+        response = self.client.post(self.url, password_failure_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertEqual(form.errors["password2"], ["このパスワードは数字しか使われていません。"])
         self.assertFalse(CustomUser.objects.exists())
 
     def test_failure_post_with_mismatch_password(self):
-        password_failure_user = {
+        password_failure_user_data = {
             "username": "testuser",
             "email": "test@test.com",
             "password1": "testpassword",
             "password2": "testpassword2",
         }
-        response = self.client.post(self.url, password_failure_user)
+        response = self.client.post(self.url, password_failure_user_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertEqual(form.errors["password2"], ["確認用パスワードが一致しません。"])
@@ -199,13 +200,13 @@ class TestLoginView(TestCase):
     def test_success_post(self):
         user_data = {"username": "testuser", "password": "testpassword"}
         response = self.client.post(self.url, user_data)
-        self.assertEqual(response.context["username"], "testuser")
         self.assertRedirects(
             response,
             reverse(settings.LOGIN_REDIRECT_URL),
             status_code=302,
             target_status_code=200,
         )
+
         self.assertIn(SESSION_KEY, self.client.session)
 
     def test_failure_post_with_not_exists_user(self):
