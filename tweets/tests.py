@@ -13,9 +13,9 @@ class TestHomeView(TestCase):
             email="test@test.com",
             password="testpassword",
         )
+        self.client.login(username="testuser", password="testpassword")
 
     def test_success_get(self):
-        self.client.login(self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "tweets/home.html")

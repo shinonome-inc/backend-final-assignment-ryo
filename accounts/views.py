@@ -31,5 +31,5 @@ class UserLoginView(LoginView):
     template_name = "accounts/login.html"
 
 
-class UserLogoutView(LoginRequiredMixin, LogoutView):
+class UserLogoutView(LogoutView):
     template_name = "accounts/logout.html"
