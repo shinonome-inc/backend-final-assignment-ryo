@@ -15,7 +15,7 @@ class TestHomeView(TestCase):
         )
 
     def test_success_get(self):
-        self.client.force_login(self.user)
+        self.client.login(self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "tweets/home.html")
