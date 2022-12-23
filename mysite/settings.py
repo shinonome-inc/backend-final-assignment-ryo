@@ -129,4 +129,4 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "tweets:home"
-LOGOUT_REDIRECT_URL = "welcome:index"
+LOGOUT_REDIRECT_URL = "accounts:login"
