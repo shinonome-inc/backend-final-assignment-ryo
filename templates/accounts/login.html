@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}SignUp{% endblock %}
+{% block title %}LogIn{% endblock %}
 {% block content %}
 <div>
   <form method="POST">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">登録</button>
+    <button type="submit">ログイン</button>
   </form>
   <p><a href="{% url 'welcome:index' %}">戻る</a></p>
 {% endblock %}

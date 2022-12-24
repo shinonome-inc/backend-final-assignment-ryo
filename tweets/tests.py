@@ -1,10 +1,19 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+
+User = get_user_model()
 
 
 class TestHomeView(TestCase):
     def setUp(self):
         self.url = reverse("tweets:home")
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="test@test.com",
+            password="testpassword",
+        )
+        self.client.login(username="testuser", password="testpassword")
 
     def test_success_get(self):
         response = self.client.get(self.url)
