@@ -32,4 +32,4 @@ class UserLoginView(LoginView):
 
 
 class UserLogoutView(LogoutView):
-    template_name = "welcome/index.html"
+    pass
