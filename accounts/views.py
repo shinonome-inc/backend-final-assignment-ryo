@@ -1,16 +1,14 @@
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import (
-    CreateView,
-    TemplateView,
-    UpdateView,
-    DetailView,
-    ListView,
-)
+from django.views.generic import CreateView,TemplateView,DetailView
+from django.contrib.auth import get_user_model
 
 from .forms import LoginForm, SignUpForm
+
+User = get_user_model()
 
 
 # Create your views here.
@@ -39,3 +37,11 @@ class UserLoginView(LoginView):
 
 class UserLogoutView(LogoutView):
     pass
+
+class UserProfileView(LoginRequieredMixin, DetailView):
+    template_name = "accounts/profile.html"
+    model = User
+    context_object_name = "user"
+    
+
+    
