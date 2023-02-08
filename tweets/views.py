@@ -1,6 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView, DeleteView, DetailView, ListView
 
+from .models import Tweet
+
 
 class HomeView(LoginRequiredMixin, ListView):
     template_name = "tweets/home.html"

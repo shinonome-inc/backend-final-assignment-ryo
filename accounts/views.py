@@ -3,10 +3,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import CreateView,TemplateView,DetailView
+from django.views.generic import CreateView, DetailView
 from django.contrib.auth import get_user_model
 
 from .forms import LoginForm, SignUpForm
+from tweets.models import Tweet
+
 
 User = get_user_model()
 
@@ -38,10 +40,17 @@ class UserLoginView(LoginView):
 class UserLogoutView(LogoutView):
     pass
 
-class UserProfileView(LoginRequieredMixin, DetailView):
+
+class UserProfileView(LoginRequiredMixin, DetailView):
     template_name = "accounts/profile.html"
     model = User
-    context_object_name = "user"
-    
+    context_object_name = "profile"
 
-    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tweets"] = (
+            Tweet.objects.select_related("user")
+            .filter(user=self.request.user)
+            .order_by("-created_at")
+        )
+        return context
