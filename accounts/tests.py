@@ -4,6 +4,8 @@ from django.urls import reverse
 
 from mysite import settings
 
+from tweets.models import Tweet
+
 User = get_user_model()
 
 
@@ -255,8 +257,33 @@ class TestLogoutView(TestCase):
 
 
 class TestUserProfileView(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(
+            username="testuser1",
+            email="test1@test.com",
+            password="testpassword1",
+        )
+        self.user2 = User.objects.create_user(
+            username="testuser2",
+            email="test2@test.com",
+            password="testpassword2",
+        )
+        self.client.login(username="testuser1", password="testpassword1")
+        self.post = Tweet.objects.create(user=self.user1, content="testpost")
+        self.url = reverse(
+            "accounts:user_profile", kwargs={"username": self.user1.username}
+        )
+        self.post1 = Tweet.objects.create(user=self.user1, content="testpost1")
+        self.post2 = Tweet.objects.create(user=self.user2, content="testpost2")
+
     def test_success_get(self):
-        pass
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/profile.html")
+        self.assertQuerysetEqual(
+            response.context["tweet_list"],
+            Tweet.objects.filter(user=self.user1).order_by("-created_at"),
+        )
 
 
 class TestUserProfileEditView(TestCase):

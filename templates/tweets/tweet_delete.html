@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <p>以下の投稿を削除します</p>
+  <p>投稿者 : {{ tweet_delete.user }}</p>
+  <p>内容 : {{ tweet_delete.content }}</p>
+  <p>作成日時 : {{ tweet_delete.created_at }}</p>
+  {% if tweet_delete.user == request.user %}
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">削除する</button>
+  </form>
+    <a href="{% url 'tweets:detail' tweet_delete.pk %}" >キャンセル</a>
+
+  {% endif %}
+{% endblock %}
