@@ -1,10 +1,16 @@
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
+from django.contrib.auth import get_user_model
 
 from .forms import LoginForm, SignUpForm
+from tweets.models import Tweet
+
+
+User = get_user_model()
 
 
 # Create your views here.
@@ -33,3 +39,20 @@ class UserLoginView(LoginView):
 
 class UserLogoutView(LogoutView):
     pass
+
+
+class UserProfileView(LoginRequiredMixin, DetailView):
+    template_name = "accounts/profile.html"
+    model = User
+    context_object_name = "user"
+    slug_field = "username"
+    slug_url_kwarg = "username"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tweet_list"] = (
+            Tweet.objects.select_related("user")
+            .filter(user=self.object)
+            .order_by("-created_at")
+        )
+        return context
