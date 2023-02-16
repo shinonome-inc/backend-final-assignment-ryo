@@ -3,11 +3,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, TemplateView
 from django.contrib.auth import get_user_model
 
 from .forms import LoginForm, SignUpForm
 from tweets.models import Tweet
+from .models import FriendShip
 
 
 User = get_user_model()
@@ -56,3 +57,8 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             .order_by("-created_at")
         )
         return context
+
+
+class FollowView(LoginRequiredMixin, TemplateView):
+    template_name = "accounts/follow.html"
+    model = FriendShip
