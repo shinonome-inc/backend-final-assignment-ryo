@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, TemplateView
+from django.views.generic import CreateView, ListView, DetailView, TemplateView
 from django.contrib.auth import get_user_model
 
 from .forms import LoginForm, SignUpForm
@@ -62,3 +62,27 @@ class UserProfileView(LoginRequiredMixin, DetailView):
 class FollowView(LoginRequiredMixin, TemplateView):
     template_name = "accounts/follow.html"
     model = FriendShip
+
+
+class FollowingListView(LoginRequiredMixin, ListView):
+    template_name = "accounts/following_list.html"
+    model = FriendShip
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["following_list"] = FriendShip.objects.select_related(
+            "following"
+        ).filter(following=self.request.user)
+        return context
+
+
+class FollowerListView(LoginRequiredMixin, ListView):
+    template_name = "accounts/follower_list.html"
+    model = FriendShip
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["follower_list"] = FriendShip.objects.select_related("follewed").filter(
+            following=self.request.user
+        )
+        return context

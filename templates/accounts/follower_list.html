@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load in_group %}
+{% block content %}
+<h1>フォロワー一覧</h1>
+{% for follower in follower_list %}
+<div>
+  <a href="{% url 'accounts:user_profile' follower.followed.username %}">{{ follower.followed }}</a>
+  {% if follower.following in following_list %}
+    <a href="{% url 'accounts:unfollow' follower.following.username %}"><button type="button">フォロー解除</button></a>
+  {% else %}
+    <a href="{% url 'accounts:follow' follower.following.username %}"><button type="button" type="button">フォローする</button></a>
+  {% endif %}
+</div>
+{% empty %}
+  <p>フォロワーはいません。</p>
+{% endfor %}
+<a href="{% url 'accounts:user_profile' user.username %}">戻る</a>
+{% endblock %}
