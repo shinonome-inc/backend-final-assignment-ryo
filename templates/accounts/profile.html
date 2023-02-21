@@ -2,7 +2,13 @@
 {% block title %}プロフィール{% endblock %}
 {% block content %}
   <h1>{{ user.username }}</h1>
-  <a href="{% url 'tweets:home' %}">ホームへ戻る</a>
+  <p>フォロー：<a href="{% url 'accounts:following_list' user.username %}">{{ followings_num }}</a> / フォロワー：<a href="{% url 'accounts:follower_list' user.username %}">{{ followers_num }}</a></p>
+  {% if user in following_list %}
+    <a href="{% url 'accounts:unfollow' user.username %}">フォロー解除</a>
+  {% else %}
+    <a href="{% url 'accounts:follow' user.username %}">フォローする</a>
+  {% endif %}
+  <p><a href="{% url 'tweets:home' %}">ホームへ戻る</a></p>
   {% for tweet in tweet_list %}
     <div>
       <p>投稿者 : {{ tweet.user }}</p>

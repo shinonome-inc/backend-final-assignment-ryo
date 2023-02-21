@@ -7,13 +7,14 @@
   <button type="submit">フォロー</button>
 </form>
 {% if messages %}
-<ul class="messages">
-    {%for message in messages %}
-    <li {%if messages.tags %} class="{{messages.tags}}" }{% endif %}>
-        {{message}}
-    </li>
-    {% endfor %}
-</ul>
+  <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <ul class="messages">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
 {% endif %}
 <a href="{% url 'tweets:home' %}">キャンセル</a>
 {% endblock %}
