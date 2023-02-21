@@ -1,10 +1,11 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView, TemplateView
-from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+from django.contrib import messages
+from django.shortcuts import redirect
 
 from .forms import LoginForm, SignUpForm
 from tweets.models import Tweet
@@ -61,7 +62,37 @@ class UserProfileView(LoginRequiredMixin, DetailView):
 
 class FollowView(LoginRequiredMixin, TemplateView):
     template_name = "accounts/follow.html"
-    model = FriendShip
+
+    def post(self, request, *args, **kwargs):
+        following = User.objects.get(username=self.kwargs["username"])
+
+        if following == request.user:
+            messages.warning(request, "自分自身はフォローできません。")
+        elif FriendShip.objects.filter(
+            following=following, followed=request.user
+        ).exists():
+            messages.warning(request, "すでにフォローしています。")
+        else:
+            FriendShip.objects.create(following=following, followed=request.user)
+            messages.success(request, "フォローしました。")
+
+        return redirect("tweets:home")
+
+
+class UnFollowView(LoginRequiredMixin, TemplateView):
+    template_name = "accounts/follow.html"
+
+    def post(self, request, *args, **kwargs):
+        following = User.objects.get(username=self.kwargs["username"])
+        follow = FriendShip.objects.filter(following=following, followed=request.user)
+
+        if follow.exists():
+            follow.delete()
+            messages.success(request, "フォローを解除しました。")
+        else:
+            messages.warning(request, "無効な操作です。")
+
+        return redirect("tweets:home")
 
 
 class FollowingListView(LoginRequiredMixin, ListView):
@@ -85,4 +116,7 @@ class FollowerListView(LoginRequiredMixin, ListView):
         context["follower_list"] = FriendShip.objects.select_related("follewed").filter(
             following=self.request.user
         )
+        context["following_list"] = FriendShip.objects.select_related(
+            "following"
+        ).filter(following=self.request.user)
         return context
