@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>UnFollow</h1>
 <p>{{ username }}をフォローを解除しますか？</p>
 <form method="post">
   {% csrf_token %}
@@ -15,5 +14,5 @@
     {% endfor %}
 </ul>
 {% endif %}
-<a href="{% url 'tweets:home' %}">キャンセル</a>
+<a href="{% url 'accounts:user_profile' username %}">キャンセル</a>
 {% endblock %}

@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Follow</h1>
 <p>{{ username }}をフォローしますか？</p>
 <form method="post">
   {% csrf_token %}
@@ -13,8 +12,7 @@
         <li>{{ message }}</li>
       {% endfor %}
     </ul>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 {% endif %}
-<a href="{% url 'tweets:home' %}">キャンセル</a>
+<a href="{% url 'accounts:user_profile' username %}">キャンセル</a>
 {% endblock %}
