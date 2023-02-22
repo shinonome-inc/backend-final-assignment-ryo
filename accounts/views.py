@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView, TemplateView
 from django.http import HttpResponse
 from django.contrib import messages
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import HttpResponseRedirect, render, get_object_or_404
 
 from .forms import LoginForm, SignUpForm
 from tweets.models import Tweet
@@ -76,15 +76,15 @@ class FollowView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         following = get_object_or_404(User, username=self.kwargs["username"])
         follower = self.request.user
-        if following == request.user:
+        if following == follower:
             messages.warning(request, "自分自身はフォローできません。")
-            return redirect("accounts:follow", username=following.username)
+            return render(request, "accounts/follow.html")
         elif FriendShip.objects.filter(following=following, followed=follower).exists():
             messages.warning(request, "すでにフォローしています。")
-            return redirect("accounts:follow", username=following.username)
+            return render(request, "accounts/follow.html")
         else:
             FriendShip.objects.create(following=following, followed=follower)
-        return redirect("tweets:home")
+        return HttpResponseRedirect(reverse_lazy("tweets:home"))
 
 
 class UnFollowView(LoginRequiredMixin, TemplateView):
@@ -92,16 +92,14 @@ class UnFollowView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         following = get_object_or_404(User, username=self.kwargs["username"])
-        follow = FriendShip.objects.filter(
-            following=following, followed=self.request.user
-        )
+        unfollow = FriendShip.objects.filter(following=following, followed=request.user)
 
-        if follow.exists():
-            follow.delete()
-            return redirect("tweets:home")
+        if unfollow.exists():
+            unfollow.delete()
+            return HttpResponseRedirect(reverse_lazy("tweets:home"))
         else:
             messages.warning(request, "無効な操作です。")
-            return redirect("accounts:unfollow", username=following.username)
+            return render(request, "accounts/unfollow.html")
 
 
 class FollowingListView(LoginRequiredMixin, ListView):

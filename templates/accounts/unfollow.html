@@ -6,13 +6,13 @@
   <button type="submit">フォロー解除</button>
 </form>
 {% if messages %}
-<ul class="messages">
-    {%for message in messages %}
-    <li {%if messages.tags %} class="{{messages.tags}}" }{% endif %}>
-        {{message}}
-    </li>
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+  <ul class="messages">
+    {% for message in messages %}
+      <li>{{ message }}</li>
     {% endfor %}
-</ul>
+  </ul>
+</div>
 {% endif %}
-<a href="{% url 'accounts:user_profile' username %}">キャンセル</a>
+<a href="{% url 'tweets:home' %}">キャンセル</a>
 {% endblock %}

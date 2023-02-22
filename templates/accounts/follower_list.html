@@ -10,5 +10,5 @@
 {% else %}
   <p>フォロワーはいません</p>
 {% endif %}
-<a href="{% url 'accounts:user_profile' user.username %}">戻る</a>
+<a href="{% url 'accounts:user_profile' user.username %}"><button type="button">戻る</button></a>
 {% endblock %}
