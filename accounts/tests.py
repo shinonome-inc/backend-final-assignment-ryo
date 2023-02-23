@@ -349,7 +349,7 @@ class TestFollowView(TestCase):
     def test_failure_post_with_self(self):
         url = reverse("accounts:follow", kwargs={"username": self.user1.username})
         response = self.client.post(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
         self.assertFalse(FriendShip.objects.exists())
         messages = list(get_messages(response.wsgi_request))
         message = str(messages[0])
@@ -395,10 +395,10 @@ class TestUnfollowView(TestCase):
     def test_failure_post_with_incorrect_user(self):
         url = reverse("accounts:unfollow", kwargs={"username": self.user1.username})
         response = self.client.post(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
         messages = list(get_messages(response.wsgi_request))
         message = str(messages[0])
-        self.assertEquals(message, "無効な操作です。")
+        self.assertEquals(message, "自分自身を対象には出来ません。")
         self.assertTrue(
             FriendShip.objects.filter(
                 followed=self.user1, following=self.user2

@@ -75,21 +75,23 @@ class FollowView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         following = get_object_or_404(User, username=self.kwargs["username"])
-        follower = self.request.user
+        follower = request.user
+        context = {"username": following}
         if following == follower:
             messages.warning(request, "自分自身はフォローできません。")
-            return HttpResponseBadRequest()
+            return HttpResponseBadRequest(
+                render(request, "accounts/follow.html", context)
+            )
 
         elif FriendShip.objects.filter(following=following, followed=follower).exists():
             messages.warning(request, "すでにフォローしています。")
-            return HttpResponseBadRequest()
+            return HttpResponseBadRequest(
+                render(request, "accounts/follow.html", context)
+            )
 
         else:
             FriendShip.objects.create(following=following, followed=follower)
             return HttpResponseRedirect(reverse_lazy("tweets:home"))
-
-        context = {"username": following}
-        return render(request, "accounts/follow.html", context)
 
 
 class UnFollowView(LoginRequiredMixin, TemplateView):
@@ -97,19 +99,23 @@ class UnFollowView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         following = get_object_or_404(User, username=self.kwargs["username"])
-        follower = self.request.user
+        follower = request.user
         unfollow = FriendShip.objects.filter(following=following, followed=follower)
+        context = {"username": following}
         if following == follower:
             messages.warning(request, "自分自身を対象には出来ません。")
+            return HttpResponseBadRequest(
+                render(request, "accounts/unfollow.html", context)
+            )
 
         elif unfollow.exists():
             unfollow.delete()
             return HttpResponseRedirect(reverse_lazy("tweets:home"))
         else:
             messages.warning(request, "無効な操作です。")
-
-        context = {"username": following}
-        return render(request, "accounts/unfollow.html", context)
+            return HttpResponseBadRequest(
+                render(request, "accounts/unfollow.html", context)
+            )
 
 
 class FollowingListView(LoginRequiredMixin, ListView):
