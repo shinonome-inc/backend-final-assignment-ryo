@@ -1,8 +1,9 @@
 from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, DetailView, TemplateView
+from django.views import View
+from django.urls import reverse_lazy, reverse
+from django.views.generic import CreateView, ListView, DetailView
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.contrib import messages
 from django.shortcuts import HttpResponseRedirect, render, get_object_or_404
@@ -70,9 +71,7 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         return context
 
 
-class FollowView(LoginRequiredMixin, TemplateView):
-    template_name = "accounts/follow.html"
-
+class FollowView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         following = get_object_or_404(User, username=self.kwargs["username"])
         follower = request.user
@@ -80,23 +79,21 @@ class FollowView(LoginRequiredMixin, TemplateView):
         if following == follower:
             messages.warning(request, "自分自身はフォローできません。")
             return HttpResponseBadRequest(
-                render(request, "accounts/follow.html", context)
+                render(request, "accounts/profile.html", context)
             )
 
         elif FriendShip.objects.filter(following=following, follower=follower).exists():
             messages.warning(request, "すでにフォローしています。")
             return HttpResponseBadRequest(
-                render(request, "accounts/follow.html", context)
+                render(request, "accounts/profile.html", context)
             )
 
         else:
             FriendShip.objects.create(following=following, follower=follower)
-            return HttpResponseRedirect(reverse_lazy("tweets:home"))
+            return HttpResponseRedirect(reverse("tweets:home"))
 
 
-class UnFollowView(LoginRequiredMixin, TemplateView):
-    template_name = "accounts/unfollow.html"
-
+class UnFollowView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         following = get_object_or_404(User, username=self.kwargs["username"])
         follower = request.user
@@ -105,16 +102,16 @@ class UnFollowView(LoginRequiredMixin, TemplateView):
         if following == follower:
             messages.warning(request, "自分自身を対象には出来ません。")
             return HttpResponseBadRequest(
-                render(request, "accounts/unfollow.html", context)
+                render(request, "accounts/profile.html", context)
             )
 
         elif unfollow.exists():
             unfollow.delete()
-            return HttpResponseRedirect(reverse_lazy("tweets:home"))
+            return HttpResponseRedirect(reverse("tweets:home"))
         else:
             messages.warning(request, "無効な操作です。")
             return HttpResponseBadRequest(
-                render(request, "accounts/unfollow.html", context)
+                render(request, "accounts/profile.html", context)
             )
 
 
