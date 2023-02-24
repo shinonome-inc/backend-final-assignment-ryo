@@ -3,8 +3,9 @@
 {% block content %}
   <h1>{{ user.username }}</h1>
   <p>フォロー：<a href="{% url 'accounts:following_list' user.username %}">{{ followings_num }}</a> / フォロワー：<a href="{% url 'accounts:follower_list' user.username %}">{{ followers_num }}</a></p>
-  
-  {% if is_following %}
+  {% if request.user == user %}
+    <p>プロフィール</p>
+  {% elif is_following %}
     <a href="{% url 'accounts:unfollow' user.username %}">フォロー解除</a>
   {% else %}
     <a href="{% url 'accounts:follow' user.username %}">フォローする</a>
