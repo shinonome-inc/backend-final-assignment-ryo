@@ -59,10 +59,10 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             .order_by("-created_at")
         )
         context["is_following"] = FriendShip.objects.filter(
-            following=user, followed=self.request.user
+            following=user, follower=self.request.user
         ).exists()
         context["followings_num"] = FriendShip.objects.filter(
-            followed=self.object
+            follower=self.object
         ).count()
         context["followers_num"] = FriendShip.objects.filter(
             following=self.object
@@ -83,14 +83,14 @@ class FollowView(LoginRequiredMixin, TemplateView):
                 render(request, "accounts/follow.html", context)
             )
 
-        elif FriendShip.objects.filter(following=following, followed=follower).exists():
+        elif FriendShip.objects.filter(following=following, follower=follower).exists():
             messages.warning(request, "すでにフォローしています。")
             return HttpResponseBadRequest(
                 render(request, "accounts/follow.html", context)
             )
 
         else:
-            FriendShip.objects.create(following=following, followed=follower)
+            FriendShip.objects.create(following=following, follower=follower)
             return HttpResponseRedirect(reverse_lazy("tweets:home"))
 
 
@@ -100,7 +100,7 @@ class UnFollowView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         following = get_object_or_404(User, username=self.kwargs["username"])
         follower = request.user
-        unfollow = FriendShip.objects.filter(following=following, followed=follower)
+        unfollow = FriendShip.objects.filter(following=following, follower=follower)
         context = {"username": following}
         if following == follower:
             messages.warning(request, "自分自身を対象には出来ません。")
@@ -127,7 +127,7 @@ class FollowingListView(LoginRequiredMixin, ListView):
         user = get_object_or_404(User, username=self.kwargs["username"])
         context["following_list"] = FriendShip.objects.select_related(
             "following"
-        ).filter(followed=user)
+        ).filter(follower=user)
         return context
 
 
@@ -138,7 +138,7 @@ class FollowerListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = get_object_or_404(User, username=self.kwargs["username"])
-        context["follower_list"] = FriendShip.objects.select_related("followed").filter(
+        context["follower_list"] = FriendShip.objects.select_related("follower").filter(
             following=user
         )
         return context

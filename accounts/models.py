@@ -10,14 +10,14 @@ class FriendShip(models.Model):
     following = models.ForeignKey(
         CustomUser, related_name="following", on_delete=models.CASCADE
     )
-    followed = models.ForeignKey(
-        CustomUser, related_name="followed", on_delete=models.CASCADE
+    follower = models.ForeignKey(
+        CustomUser, related_name="follower", on_delete=models.CASCADE
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["following", "followed"], name="follow_unique"
+                fields=["following", "follower"], name="follow_unique"
             ),
         ]

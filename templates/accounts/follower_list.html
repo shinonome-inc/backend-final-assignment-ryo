@@ -4,7 +4,7 @@
 {% if follower_list %}
 {% for follower in follower_list %}
 <div>
-  <a href="{% url 'accounts:user_profile' follower.followed.username %}">{{ follower.followed }}</a>
+  <a href="{% url 'accounts:user_profile' follower.follower.username %}">{{ follower.follower }}</a>
 </div>
 {% endfor %}
 {% else %}

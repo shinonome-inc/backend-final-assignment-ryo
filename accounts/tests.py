@@ -277,7 +277,7 @@ class TestUserProfileView(TestCase):
         )
         self.post1 = Tweet.objects.create(user=self.user1, content="testpost1")
         self.post2 = Tweet.objects.create(user=self.user2, content="testpost2")
-        FriendShip.objects.create(followed=self.user1, following=self.user2)
+        FriendShip.objects.create(follower=self.user1, following=self.user2)
 
     def test_success_get(self):
         response = self.client.get(self.url)
@@ -289,7 +289,7 @@ class TestUserProfileView(TestCase):
         )
         self.assertEqual(
             response.context["followings_num"],
-            FriendShip.objects.filter(followed=self.user1).count(),
+            FriendShip.objects.filter(follower=self.user1).count(),
         )
         self.assertEqual(
             response.context["followers_num"],
@@ -336,7 +336,7 @@ class TestFollowView(TestCase):
         )
         self.assertTrue(
             FriendShip.objects.filter(
-                followed=self.user1, following=self.user2
+                follower=self.user1, following=self.user2
             ).exists()
         )
 
@@ -369,7 +369,7 @@ class TestUnfollowView(TestCase):
             password="testpassword2",
         )
         self.client.login(username="testuser1", password="testpassword1")
-        FriendShip.objects.create(followed=self.user1, following=self.user2)
+        FriendShip.objects.create(follower=self.user1, following=self.user2)
 
     def test_success_post(self):
         url = reverse("accounts:unfollow", kwargs={"username": self.user2.username})
@@ -388,7 +388,7 @@ class TestUnfollowView(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertTrue(
             FriendShip.objects.filter(
-                followed=self.user1, following=self.user2
+                follower=self.user1, following=self.user2
             ).exists()
         )
 
@@ -401,7 +401,7 @@ class TestUnfollowView(TestCase):
         self.assertEquals(message, "自分自身を対象には出来ません。")
         self.assertTrue(
             FriendShip.objects.filter(
-                followed=self.user1, following=self.user2
+                follower=self.user1, following=self.user2
             ).exists()
         )
 
@@ -419,7 +419,7 @@ class TestFollowingListView(TestCase):
             password="testpassword2",
         )
         self.client.login(username="testuser1", password="testpassword1")
-        FriendShip.objects.create(followed=self.user2, following=self.user1)
+        FriendShip.objects.create(follower=self.user2, following=self.user1)
         self.url = reverse(
             "accounts:following_list", kwargs={"username": self.user1.username}
         )
@@ -443,7 +443,7 @@ class TestFollowerListView(TestCase):
             password="testpassword2",
         )
         self.client.login(username="testuser1", password="testpassword1")
-        FriendShip.objects.create(followed=self.user1, following=self.user2)
+        FriendShip.objects.create(follower=self.user1, following=self.user2)
         self.url = reverse(
             "accounts:follower_list", kwargs={"username": self.user1.username}
         )
