@@ -121,7 +121,11 @@ class FollowingListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs["username"])
-        return FriendShip.objects.select_related("following").filter(follower=user)
+        return (
+            FriendShip.objects.select_related("following")
+            .filter(follower=user)
+            .order_by("-created_at")
+        )
 
 
 class FollowerListView(LoginRequiredMixin, ListView):
@@ -130,4 +134,8 @@ class FollowerListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs["username"])
-        return FriendShip.objects.select_related("follower").filter(following=user)
+        return (
+            FriendShip.objects.select_related("follower")
+            .filter(following=user)
+            .order_by("-created_at")
+        )
