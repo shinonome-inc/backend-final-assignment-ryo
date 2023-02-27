@@ -17,15 +17,7 @@
     </form>
   {% endif %}
   
-  {% if messages %}
-  <div class="alert alert-info alert-dismissible fade show" role="alert">
-    <ul class="messages">
-      {% for message in messages %}
-        <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-  {% endif %}
+  
   <p><a href="{% url 'tweets:home' %}">ホームへ戻る</a></p>
   {% for tweet in tweet_list %}
     <div>
