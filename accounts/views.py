@@ -75,26 +75,14 @@ class FollowView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         following = get_object_or_404(User, username=self.kwargs["username"])
         follower = request.user
-        context = {
-            "user": following,
-            "is_following": FriendShip.objects.filter(
-                following=following, follower=follower
-            ).exists(),
-            "followings_num": FriendShip.objects.filter(follower=following).count(),
-            "followers_num": FriendShip.objects.filter(following=following).count(),
-            "tweet_list": Tweet.objects.filter(user=following).order_by("-created_at"),
-        }
+
         if following == follower:
             messages.warning(request, "自分自身はフォローできません。")
-            return HttpResponseBadRequest(
-                render(request, "accounts/profile.html", context)
-            )
+            return HttpResponseBadRequest("フォローに失敗しました。")
 
         if FriendShip.objects.filter(following=following, follower=follower).exists():
             messages.warning(request, "すでにフォローしています。")
-            return HttpResponseBadRequest(
-                render(request, "accounts/profile.html", context)
-            )
+            return HttpResponseBadRequest("フォローに失敗しました。")
 
         FriendShip.objects.create(following=following, follower=follower)
         return HttpResponseRedirect(reverse("tweets:home"))
@@ -105,29 +93,17 @@ class UnFollowView(LoginRequiredMixin, View):
         following = get_object_or_404(User, username=self.kwargs["username"])
         follower = request.user
         unfollow = FriendShip.objects.filter(following=following, follower=follower)
-        context = {
-            "user": following,
-            "is_following": FriendShip.objects.filter(
-                following=following, follower=follower
-            ).exists(),
-            "followings_num": FriendShip.objects.filter(follower=following).count(),
-            "followers_num": FriendShip.objects.filter(following=following).count(),
-            "tweet_list": Tweet.objects.filter(user=following).order_by("-created_at"),
-        }
+
         if following == follower:
             messages.warning(request, "自分自身を対象には出来ません。")
-            return HttpResponseBadRequest(
-                render(request, "accounts/profile.html", context)
-            )
+            return HttpResponseBadRequest("フォロー解除に失敗しました")
 
         elif unfollow.exists():
             unfollow.delete()
             return HttpResponseRedirect(reverse("tweets:home"))
         else:
             messages.warning(request, "無効な操作です。")
-            return HttpResponseBadRequest(
-                render(request, "accounts/profile.html", context)
-            )
+            return HttpResponseBadRequest("フォロー解除に失敗しました")
 
 
 class FollowingListView(LoginRequiredMixin, ListView):
