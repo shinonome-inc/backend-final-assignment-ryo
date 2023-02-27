@@ -32,7 +32,8 @@ class UserSignUpView(CreateView):
             login(self.request, user)
             return response
         else:
-            return HttpResponse("もう一度やり直してください")
+            messages.warning(self.request, "もう一度やり直してください。")
+            return HttpResponseBadRequest(self.request, "error/400.html")
 
 
 class UserLoginView(LoginView):
@@ -78,11 +79,11 @@ class FollowView(LoginRequiredMixin, View):
 
         if following == follower:
             messages.warning(request, "自分自身はフォローできません。")
-            return HttpResponseBadRequest("フォローに失敗しました。")
+            return HttpResponseBadRequest(request, "error/400.html")
 
         if FriendShip.objects.filter(following=following, follower=follower).exists():
             messages.warning(request, "すでにフォローしています。")
-            return HttpResponseBadRequest("フォローに失敗しました。")
+            return HttpResponseBadRequest(request, "error/400.html")
 
         FriendShip.objects.create(following=following, follower=follower)
         return HttpResponseRedirect(reverse("tweets:home"))
@@ -96,14 +97,14 @@ class UnFollowView(LoginRequiredMixin, View):
 
         if following == follower:
             messages.warning(request, "自分自身を対象には出来ません。")
-            return HttpResponseBadRequest("フォロー解除に失敗しました")
+            return HttpResponseBadRequest(request, "error/400.html")
 
         elif unfollow.exists():
             unfollow.delete()
             return HttpResponseRedirect(reverse("tweets:home"))
         else:
             messages.warning(request, "無効な操作です。")
-            return HttpResponseBadRequest("フォロー解除に失敗しました")
+            return HttpResponseBadRequest(request, "error/400.html")
 
 
 class FollowingListView(LoginRequiredMixin, ListView):
