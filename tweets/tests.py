@@ -118,8 +118,8 @@ class TestTweetDeleteView(TestCase):
         self.post2 = Tweet.objects.create(user=self.user2, content="testpost2")
 
     def test_success_post(self):
-        self.url = reverse("tweets:delete", kwargs={"pk": self.post1.pk})
-        response = self.client.post(self.url)
+        url = reverse("tweets:delete", kwargs={"pk": self.post1.pk})
+        response = self.client.post(url)
         self.assertRedirects(
             response,
             reverse("tweets:home"),
@@ -129,14 +129,14 @@ class TestTweetDeleteView(TestCase):
         self.assertFalse(Tweet.objects.filter(content="testpost1").exists())
 
     def test_failure_post_with_not_exist_tweet(self):
-        self.url = reverse("tweets:delete", kwargs={"pk": 123})
-        response = self.client.post(self.url)
+        url = reverse("tweets:delete", kwargs={"pk": 123})
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 404)
         self.assertTrue(Tweet.objects.filter(content="testpost1").exists())
 
     def test_failure_post_with_incorrect_user(self):
-        self.url = reverse("tweets:delete", kwargs={"pk": self.post2.pk})
-        response = self.client.post(self.url)
+        url = reverse("tweets:delete", kwargs={"pk": self.post2.pk})
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Tweet.objects.filter(content="testpost2").exists())
 
