@@ -1,9 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-# from django.http import JsonResponse
+from django.http import JsonResponse
 from django.urls import reverse_lazy
 
-# from django.views import View
+from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView
 
 from .forms import TweetCreateForm
@@ -42,3 +42,5 @@ class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         tweet = self.get_object()
         return self.request.user == tweet.user
+
+class LikeView(LoginRequiredMixin, View):
