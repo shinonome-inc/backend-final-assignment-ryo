@@ -1,17 +1,17 @@
-from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib import messages
+from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.views import View
-from django.urls import reverse_lazy, reverse
-from django.views.generic import CreateView, ListView, DetailView
 from django.http import HttpResponseBadRequest
-from django.contrib import messages
-from django.shortcuts import HttpResponseRedirect, render, get_object_or_404
+from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
+from django.urls import reverse, reverse_lazy
+from django.views import View
+from django.views.generic import CreateView, DetailView, ListView
+
+from tweets.models import Tweet
 
 from .forms import LoginForm, SignUpForm
-from tweets.models import Tweet
 from .models import FriendShip
-
 
 User = get_user_model()
 
@@ -55,20 +55,10 @@ class UserProfileView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = get_object_or_404(User, username=self.kwargs["username"])
-        context["tweet_list"] = (
-            Tweet.objects.select_related("user")
-            .filter(user=self.object)
-            .order_by("-created_at")
-        )
-        context["is_following"] = FriendShip.objects.filter(
-            following=user, follower=self.request.user
-        ).exists()
-        context["followings_num"] = FriendShip.objects.filter(
-            follower=self.object
-        ).count()
-        context["followers_num"] = FriendShip.objects.filter(
-            following=self.object
-        ).count()
+        context["tweet_list"] = Tweet.objects.select_related("user").filter(user=self.object).order_by("-created_at")
+        context["is_following"] = FriendShip.objects.filter(following=user, follower=self.request.user).exists()
+        context["followings_num"] = FriendShip.objects.filter(follower=self.object).count()
+        context["followers_num"] = FriendShip.objects.filter(following=self.object).count()
         return context
 
 
@@ -113,11 +103,7 @@ class FollowingListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs["username"])
-        return (
-            FriendShip.objects.select_related("following")
-            .filter(follower=user)
-            .order_by("-created_at")
-        )
+        return FriendShip.objects.select_related("following").filter(follower=user).order_by("-created_at")
 
 
 class FollowerListView(LoginRequiredMixin, ListView):
@@ -126,8 +112,16 @@ class FollowerListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs["username"])
-        return (
-            FriendShip.objects.select_related("follower")
-            .filter(following=user)
-            .order_by("-created_at")
-        )
+        return FriendShip.objects.select_related("follower").filter(following=user).order_by("-created_at")
+
+
+class UnlikeView(LoginRequiredMixin, View):
+    def post(self, request, *arg, **kwargs):
+        user = request.user
+        tweet = get_object_or_404(Tweet, pk=kwargs["pk"])
+        Like.objects.filter(tweet=tweet, created_user=user).delete()
+        context = {
+            "like_count": tweet.like_set.count(),
+            "tweet_pk": tweet.pk,
+        }
+        return JsonResponse(context)

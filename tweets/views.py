@@ -53,3 +53,15 @@ class LikeView(LoginRequiredMixin, View):
             "tweet_pk": tweet.pk,
         }
         return JsonResponse(context)
+
+
+class UnlikeView(LoginRequiredMixin, View):
+    def post(self, request, *arg, **kwargs):
+        user = request.user
+        tweet = get_object_or_404(Tweet, pk=kwargs["pk"])
+        Like.objects.filter(tweet=tweet, created_user=user).delete()
+        context = {
+            "like_count": tweet.like_set.count(),
+            "tweet_pk": tweet.pk,
+        }
+        return JsonResponse(context)
