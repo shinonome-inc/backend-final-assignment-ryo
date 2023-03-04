@@ -113,15 +113,3 @@ class FollowerListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs["username"])
         return FriendShip.objects.select_related("follower").filter(following=user).order_by("-created_at")
-
-
-class UnlikeView(LoginRequiredMixin, View):
-    def post(self, request, *arg, **kwargs):
-        user = request.user
-        tweet = get_object_or_404(Tweet, pk=kwargs["pk"])
-        Like.objects.filter(tweet=tweet, created_user=user).delete()
-        context = {
-            "like_count": tweet.like_set.count(),
-            "tweet_pk": tweet.pk,
-        }
-        return JsonResponse(context)
