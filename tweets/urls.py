@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
 
 from . import views
 
@@ -11,3 +12,10 @@ urlpatterns = [
     # path("<int:pk>/like/", views.LikeView, name="like"),
     # path("<int:pk>/unlike/", views.UnlikeView, name="unlike"),
 ]
+
+if settings.SQL_DEBUG:
+    import debug_toolbar
+
+    urlpatterns += [
+        path("__debug__/", include(debug_toolbar.urls)),
+    ]
