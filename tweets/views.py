@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -13,7 +14,7 @@ class HomeView(LoginRequiredMixin, ListView):
     template_name = "tweets/home.html"
     model = Tweet
     context_object_name = "tweet_list"
-    queryset = Tweet.objects.select_related("user").order_by("-created_at")
+    queryset = Tweet.objects.select_related("user").annotate(like_num=Count("like")).order_by("-created_at")
 
 
 class TweetCreateView(LoginRequiredMixin, CreateView):
@@ -30,6 +31,11 @@ class TweetDetailView(LoginRequiredMixin, DetailView):
     template_name = "tweets/tweet_detail.html"
     model = Tweet
     context_object_name = "tweet_detail"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["like_num"] = Like.objects.filter(tweet=self.object).count()
+        return context
 
 
 class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -51,6 +57,7 @@ class LikeView(LoginRequiredMixin, View):
         context = {
             "like_num": like_count,
             "tweet_pk": tweet.pk,
+            "liked": True,
         }
         return JsonResponse(context)
 
@@ -64,5 +71,6 @@ class UnlikeView(LoginRequiredMixin, View):
         context = {
             "like_num": like_count,
             "tweet_pk": tweet.pk,
+            "liked": False,
         }
         return JsonResponse(context)

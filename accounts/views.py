@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
+from django.db.models import Count
 from django.http import HttpResponseBadRequest
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
 from django.urls import reverse, reverse_lazy
@@ -55,7 +56,12 @@ class UserProfileView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = get_object_or_404(User, username=self.kwargs["username"])
-        context["tweet_list"] = Tweet.objects.select_related("user").filter(user=self.object).order_by("-created_at")
+        context["tweet_list"] = (
+            Tweet.objects.select_related("user")
+            .filter(user=self.object)
+            .annotate(like_num=Count("like"))
+            .order_by("-created_at")
+        )
         context["is_following"] = FriendShip.objects.filter(following=user, follower=self.request.user).exists()
         context["followings_num"] = FriendShip.objects.filter(follower=self.object).count()
         context["followers_num"] = FriendShip.objects.filter(following=self.object).count()

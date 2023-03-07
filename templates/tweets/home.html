@@ -8,7 +8,8 @@
     <p>投稿者 : <a href="{% url 'accounts:user_profile' tweet.user.username %}">{{ tweet.user }}</a></p>
     <p>作成日時: {{ tweet.created_at }}</p>
     <p>内容 : {{ tweet.content }}</p>
-    <a href="{% url 'tweets:detail' tweet.pk %}">詳細</a>
+    <p>いいね: {{ like_num |default:"0"}}</a></p>
+    <a href="{% url 'tweets:detail' tweet.pk %}">ツイート詳細</a>
   </div>
   {% endfor %}
   <p><a href="{% url 'tweets:create' %}"><button type="button">ツイート作成</button></a></p>

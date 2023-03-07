@@ -17,22 +17,14 @@
     </form>
   {% endif %}
   
-  {% if messages %}
-  <div class="alert alert-info alert-dismissible fade show" role="alert">
-    <ul class="messages">
-      {% for message in messages %}
-        <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-  {% endif %}
   <p><a href="{% url 'tweets:home' %}">ホームへ戻る</a></p>
   {% for tweet in tweet_list %}
     <div>
       <p>投稿者 : {{ tweet.user }}</p>
       <p>作成日時 : {{ tweet.created_at }}</p>
       <p>内容 : {{ tweet.content }}</p>
-      <a href="{% url 'tweets:detail' tweet.pk %}">詳細</a>
+      <p>いいね: {{ like_num |default:"0"}}</p>
+      <a href="{% url 'tweets:detail' tweet.pk %}">ツイート詳細</a>
     </div>
   {% endfor %}
 {% endblock %}

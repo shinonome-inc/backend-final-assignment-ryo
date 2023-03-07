@@ -6,6 +6,7 @@
     <p>ツイート作成者 : <a href="{% url 'accounts:user_profile' tweet_detail.user.username %}">{{ tweet_detail.user }}</a></p>
     <p>内容 : {{ tweet_detail.content }}</p>
     <p>作成日時 : {{ tweet_detail.created_at }}</p>
+    <p>いいね: {{ like_num |default:"0"}}</p>
   </div>
   {% if tweet_detail.user == request.user %}
     <a href="{% url 'tweets:delete' tweet_detail.pk %}"><button type="button">削除</button></a>
