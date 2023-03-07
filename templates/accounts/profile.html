@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block title %}プロフィール{% endblock %}
 {% block content %}
   <h1>{{ user.username }}</h1>
@@ -23,8 +24,16 @@
       <p>投稿者 : {{ tweet.user }}</p>
       <p>作成日時 : {{ tweet.created_at }}</p>
       <p>内容 : {{ tweet.content }}</p>
-      <p>いいね: {{ like_num |default:"0"}}</p>
+      <p>
+        {% if liked %}
+            <button type="button" class="btn btn-outline-danger btn-sm" id="unlike-btn" data-url="{% url 'tweets:unlike' tweet.id %}">いいね</button>
+        {% else %}
+            <button type="button" class="btn btn-outline-primary btn-sm" id="like-btn" data-url="{% url 'tweets:like' tweet.id %}">いいね</button>
+        {% endif %}
+        <span id="like-num">{{ like_num|default:"0" }}</span></p>
       <a href="{% url 'tweets:detail' tweet.pk %}">ツイート詳細</a>
     </div>
   {% endfor %}
+
+  <script src="{% static 'js/like.js' %}"></script>
 {% endblock %}
