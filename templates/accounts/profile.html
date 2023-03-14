@@ -25,11 +25,11 @@
       <p>作成日時 : {{ tweet.created_at }}</p>
       <p>内容 : {{ tweet.content }}</p>
       <p>
-        {% if tweet.liked %}
-          <button type="button" class="btn btn-outline-danger btn-sm unlike-btn" data-url="{% url 'tweets:unlike' tweet.pk %}">いいね解除</button>
-        {% else %}
-          <button type="button" class="btn btn-outline-primary btn-sm like-btn" data-url="{% url 'tweets:like' tweet.pk %}">いいね</button>
-        {% endif %}
+      {% if tweet.liked %}
+        <button type="button" class="btn btn-outline-primary btn-sm unlike-btn" data-like-url="/tweets/{{ tweet.pk }}/unlike/" data-like-url="/tweets/{{ tweet.pk }}/like/">いいね解除</button>
+      {% else %}
+        <button type="button" class="btn btn-outline-primary btn-sm like-btn" data-unlike-url="/tweets/{{ tweet.pk }}/like/" data-unlike-url="/tweets/{{ tweet.pk }}/unlike/">いいね</button>
+      {% endif %}
         <span class="like-num">{{ tweet.like_num }}</span></p>
       <a href="{% url 'tweets:detail' tweet.pk %}">ツイート詳細</a>
     </div>

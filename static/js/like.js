@@ -1,6 +1,3 @@
-const likeBtns = document.querySelectorAll(".like-btn");
-const unlikeBtns = document.querySelectorAll(".unlike-btn");
-
 const getCookie = name => {
     if (document.cookie && document.cookie !== "") {
         const cookies = document.cookie.split(";").map(cookie => cookie.trim());
@@ -14,34 +11,41 @@ const getCookie = name => {
 };
 const csrftoken = getCookie("csrftoken");
 
-if (likeBtns) {
-    likeBtns.forEach(likeBtn => {
-        likeBtn.addEventListener("click", () => {
-            const url = likeBtn.getAttribute("data-url");
-            fetch(url, { method: "POST", headers: { "X-CSRFToken": csrftoken } })
-                .then(response => response.json())
-                .then(response => {
-                    const likeNum = likeBtn.parentNode.querySelector(".like-num");
-                    likeNum.textContent = response.like_num;
-                    likeBtn.style.display = "none";
-                    likeBtn.parentNode.querySelector(".unlike-btn").style.display = "inline-block";
-                });
-        });
-    });
-}
+document.addEventListener("click", event => {
+    if (event.target.matches(".like-btn")) {
+        const likeBtn = event.target;
+        const url = likeBtn.getAttribute("data-like-url");
+        fetch(url, { method: "POST", headers: { "X-CSRFToken": csrftoken } })
+            .then(response => response.json())
+            .then(response => {
+                const likeNum = likeBtn.parentNode.querySelector(".like-num");
+                likeNum.textContent = response.like_num;
+                likeBtn.textContent = "いいね解除";
+                likeBtn.classList.remove("like-btn");
+                likeBtn.classList.add("unlike-btn");
+                likeBtn.classList.remove("btn-outline-primary");
+                likeBtn.classList.add("btn-outline-danger");
+                likeBtn.setAttribute("data-like-url", likeBtn.getAttribute("data-unlike-url"));
+            });
+    }
+});
 
-if (unlikeBtns) {
-    unlikeBtns.forEach(unlikeBtn => {
-        unlikeBtn.addEventListener("click", () => {
-            const url = unlikeBtn.getAttribute("data-url");
-            fetch(url, { method: "POST", headers: { "X-CSRFToken": csrftoken } })
-                .then(response => response.json())
-                .then(response => {
-                    const likeNum = unlikeBtn.parentNode.querySelector(".like-num");
-                    likeNum.textContent = response.like_num;
-                    unlikeBtn.style.display = "none";
-                    unlikeBtn.parentNode.querySelector(".like-btn").style.display = "inline-block";
-                });
-        });
-    });
-}
+
+document.addEventListener("click", event => {
+    if (event.target.matches(".unlike-btn")) {
+        const unlikeBtn = event.target;
+        const url = unlikeBtn.getAttribute("data-unlike-url");
+        fetch(url, { method: "POST", headers: { "X-CSRFToken": csrftoken } })
+            .then(response => response.json())
+            .then(response => {
+                const likeNum = unlikeBtn.parentNode.querySelector(".like-num");
+                likeNum.textContent = response.like_num;
+                unlikeBtn.textContent = "いいね";
+                unlikeBtn.classList.remove("unlike-btn");
+                unlikeBtn.classList.add("like-btn");
+                unlikeBtn.classList.remove("btn-outline-danger");
+                unlikeBtn.classList.add("btn-outline-primary");
+                unlikeBtn.setAttribute("data-unlike-url", unlikeBtn.getAttribute("data-like-url"));
+            });
+    }
+});

@@ -8,9 +8,9 @@
     <p>作成日時 : {{ tweet_detail.created_at }}</p>
     <p>
     {% if liked %}
-      <button type="button" class="btn btn-outline-danger btn-sm unlike-btn" data-url="{% url 'tweets:unlike' tweet_detail.pk %}">いいね解除</button>
+      <button type="button" class="btn btn-outline-danger btn-sm unlike-btn" data-unlike-url="{% url 'tweets:unlike' tweet_detail.pk %}" data-like-url="{% url 'tweets:like' tweet_detail.pk %}">いいね解除</button>
     {% else %}
-      <button type="button" class="btn btn-outline-primary btn-sm like-btn" data-url="{% url 'tweets:like' tweet_detail.pk %}">いいね</button>
+      <button type="button" class="btn btn-outline-primary btn-sm like-btn" data-like-url="{% url 'tweets:like' tweet_detail.pk %}" data-unlike-url="{% url 'tweets:unlike' tweet_detail.pk %}">いいね</button>
     {% endif %}
     <span class="like-num">{{ like_num }}</span></p>
   </div>
