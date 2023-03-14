@@ -30,11 +30,11 @@ class UserSignUpView(CreateView):
         password = form.cleaned_data["password1"]
         user = authenticate(username=username, email=email, password=password)
         if user is None:
+            messages.warning(self.request, "もう一度やり直してください。")
+            return render(self.request, "error/400.html", status=400)
+        else:
             login(self.request, user)
             return response
-        else:
-            messages.warning(self.request, "もう一度やり直してください。")
-            return HttpResponseBadRequest(render(self.request, "error/400.html"))
 
 
 class UserLoginView(LoginView):
