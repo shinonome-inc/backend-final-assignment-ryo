@@ -20,11 +20,11 @@ if (likeBtns) {
             const url = likeBtn.getAttribute("data-url");
             fetch(url, { method: "POST", headers: { "X-CSRFToken": csrftoken } })
                 .then(response => response.json())
-                .then(data => {
+                .then(response => {
                     const likeNum = likeBtn.parentNode.querySelector(".like-num");
-                    likeNum.textContent = data.likes;
+                    likeNum.textContent = response.like_num;
                     likeBtn.style.display = "none";
-                    likeBtn.nextElementSibling.style.display = "";
+                    likeBtn.parentNode.querySelector(".unlike-btn").style.display = "inline-block";
                 });
         });
     });
@@ -36,11 +36,11 @@ if (unlikeBtns) {
             const url = unlikeBtn.getAttribute("data-url");
             fetch(url, { method: "POST", headers: { "X-CSRFToken": csrftoken } })
                 .then(response => response.json())
-                .then(data => {
+                .then(response => {
                     const likeNum = unlikeBtn.parentNode.querySelector(".like-num");
-                    likeNum.textContent = data.likes;
+                    likeNum.textContent = response.like_num;
                     unlikeBtn.style.display = "none";
-                    unlikeBtn.previousElementSibling.style.display = "";
+                    unlikeBtn.parentNode.querySelector(".like-btn").style.display = "inline-block";
                 });
         });
     });

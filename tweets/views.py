@@ -16,6 +16,18 @@ class HomeView(LoginRequiredMixin, ListView):
     context_object_name = "tweet_list"
     queryset = Tweet.objects.select_related("user").annotate(like_num=Count("like")).order_by("-created_at")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tweet_list = []
+        for tweet in context["tweet_list"]:
+            liked = False
+            if tweet.like_set.filter(user=self.request.user).exists():
+                liked = True
+            tweet.liked = liked
+            tweet_list.append(tweet)
+        context["tweet_list"] = tweet_list
+        return context
+
 
 class TweetCreateView(LoginRequiredMixin, CreateView):
     template_name = "tweets/tweet_create.html"
