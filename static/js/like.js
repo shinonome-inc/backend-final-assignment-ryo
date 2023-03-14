@@ -25,7 +25,6 @@ document.addEventListener("click", event => {
                 likeBtn.classList.add("unlike-btn");
                 likeBtn.classList.remove("btn-outline-primary");
                 likeBtn.classList.add("btn-outline-danger");
-                likeBtn.setAttribute("data-like-url", likeBtn.getAttribute("data-unlike-url"));
             });
     }
 });
@@ -45,7 +44,6 @@ document.addEventListener("click", event => {
                 unlikeBtn.classList.add("like-btn");
                 unlikeBtn.classList.remove("btn-outline-danger");
                 unlikeBtn.classList.add("btn-outline-primary");
-                unlikeBtn.setAttribute("data-unlike-url", unlikeBtn.getAttribute("data-like-url"));
             });
     }
 });
