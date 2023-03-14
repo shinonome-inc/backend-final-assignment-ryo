@@ -34,7 +34,12 @@ class TweetDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["like_num"] = Like.objects.filter(tweet=self.object).count()
+        tweet = self.get_object()
+        liked = False
+        if tweet.like_set.filter(user=self.request.user).exists():
+            liked = True
+        context["like_num"] = self.object.like_set.count()
+        context["liked"] = liked
         return context
 
 
@@ -57,7 +62,6 @@ class LikeView(LoginRequiredMixin, View):
         context = {
             "like_num": like_count,
             "tweet_pk": tweet.pk,
-            "liked": True,
         }
         return JsonResponse(context)
 
@@ -71,6 +75,5 @@ class UnlikeView(LoginRequiredMixin, View):
         context = {
             "like_num": like_count,
             "tweet_pk": tweet.pk,
-            "liked": False,
         }
         return JsonResponse(context)
