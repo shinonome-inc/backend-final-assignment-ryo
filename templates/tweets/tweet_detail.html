@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% load static %}
 {% block content %}
   <a href="{% url 'tweets:home' %}">ホームへ戻る</a>
   <div>
@@ -7,16 +6,11 @@
     <p>内容 : {{ tweet_detail.content }}</p>
     <p>作成日時 : {{ tweet_detail.created_at }}</p>
     <p>
-    {% if liked %}
-      <button type="button" class="btn btn-outline-danger btn-sm unlike-btn" data-unlike-url="{% url 'tweets:unlike' tweet_detail.pk %}" data-like-url="{% url 'tweets:like' tweet_detail.pk %}">いいね解除</button>
-    {% else %}
-      <button type="button" class="btn btn-outline-primary btn-sm like-btn" data-like-url="{% url 'tweets:like' tweet_detail.pk %}" data-unlike-url="{% url 'tweets:unlike' tweet_detail.pk %}">いいね</button>
-    {% endif %}
-    <span class="like-num">{{ like_num }}</span></p>
+      {% include "tweets/like.html" %}
+    </p>
   </div>
   {% if tweet_detail.user == request.user %}
     <a href="{% url 'tweets:delete' tweet_detail.pk %}"><button type="button">削除</button></a>
   {% endif %}
-  <script src="{% static 'js/like.js' %}"></script>
   
 {% endblock %}
