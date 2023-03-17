@@ -42,7 +42,7 @@ class TweetCreateView(LoginRequiredMixin, CreateView):
 class TweetDetailView(LoginRequiredMixin, DetailView):
     template_name = "tweets/tweet_detail.html"
     model = Tweet
-    context_object_name = "tweet_detail"
+    context_object_name = "tweet"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -50,8 +50,8 @@ class TweetDetailView(LoginRequiredMixin, DetailView):
         liked = False
         if tweet.like_set.filter(user=self.request.user).exists():
             liked = True
-        context["like_num"] = self.object.like_set.count()
-        context["liked"] = liked
+        context["tweet"].liked = liked
+        context["tweet"].like_num = tweet.like_set.count()
         return context
 
 

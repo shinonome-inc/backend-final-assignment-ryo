@@ -2,15 +2,15 @@
 {% block content %}
   <a href="{% url 'tweets:home' %}">ホームへ戻る</a>
   <div>
-    <p>ツイート作成者 : <a href="{% url 'accounts:user_profile' tweet_detail.user.username %}">{{ tweet_detail.user }}</a></p>
-    <p>内容 : {{ tweet_detail.content }}</p>
-    <p>作成日時 : {{ tweet_detail.created_at }}</p>
+    <p>ツイート作成者 : <a href="{% url 'accounts:user_profile' tweet.user.username %}">{{ tweet.user }}</a></p>
+    <p>内容 : {{ tweet.content }}</p>
+    <p>作成日時 : {{ tweet.created_at }}</p>
     <p>
       {% include "tweets/like.html" %}
     </p>
   </div>
-  {% if tweet_detail.user == request.user %}
-    <a href="{% url 'tweets:delete' tweet_detail.pk %}"><button type="button">削除</button></a>
+  {% if tweet.user == request.user %}
+    <a href="{% url 'tweets:delete' tweet.pk %}"><button type="button">削除</button></a>
   {% endif %}
   
 {% endblock %}
