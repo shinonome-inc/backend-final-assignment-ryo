@@ -18,14 +18,12 @@ class HomeView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        tweet_list = []
-        for tweet in context["tweet_list"]:
-            liked = False
-            if tweet.like_set.filter(user=self.request.user).exists():
-                liked = True
+        tweet_list = context["tweet_list"]
+        for tweet in tweet_list:
+            liked = tweet.like_set.filter(user=self.request.user).exists()
             tweet.liked = liked
-            tweet_list.append(tweet)
-        context["tweet_list"] = tweet_list
+        tweet.like_num = tweet.like_set.count()
+
         return context
 
 
@@ -47,9 +45,7 @@ class TweetDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         tweet = self.get_object()
-        liked = False
-        if tweet.like_set.filter(user=self.request.user).exists():
-            liked = True
+        liked = tweet.like_set.filter(user=self.request.user).exists()
         context["tweet"].liked = liked
         context["tweet"].like_num = tweet.like_set.count()
         return context
