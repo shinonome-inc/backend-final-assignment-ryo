@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -14,17 +14,17 @@ class HomeView(LoginRequiredMixin, ListView):
     template_name = "tweets/home.html"
     model = Tweet
     context_object_name = "tweet_list"
-    queryset = Tweet.objects.select_related("user").annotate(like_num=Count("like")).order_by("-created_at")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        tweet_list = context["tweet_list"]
-        for tweet in tweet_list:
-            liked = tweet.like_set.filter(user=self.request.user).exists()
-            tweet.liked = liked
-        tweet.like_num = tweet.like_set.count()
-
-        return context
+    def get_queryset(self):
+        queryset = (
+            Tweet.objects.select_related("user")
+            .annotate(like_num=Count("like"))
+            .prefetch_related(
+                Prefetch("like_set", queryset=Like.objects.filter(user=self.request.user), to_attr="liked")
+            )
+            .order_by("-created_at")
+        )
+        return queryset
 
 
 class TweetCreateView(LoginRequiredMixin, CreateView):
@@ -42,13 +42,14 @@ class TweetDetailView(LoginRequiredMixin, DetailView):
     model = Tweet
     context_object_name = "tweet"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        tweet = self.get_object()
-        liked = tweet.like_set.filter(user=self.request.user).exists()
-        context["tweet"].liked = liked
-        context["tweet"].like_num = tweet.like_set.count()
-        return context
+    def get_queryset(self):
+        return (
+            Tweet.objects.select_related("user")
+            .prefetch_related(
+                Prefetch("like_set", queryset=Like.objects.filter(user=self.request.user), to_attr="liked")
+            )
+            .annotate(like_num=Count("like"))
+        )
 
 
 class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

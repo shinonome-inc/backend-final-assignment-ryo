@@ -2,14 +2,14 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.http import HttpResponseBadRequest
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView
 
-from tweets.models import Tweet
+from tweets.models import Like, Tweet
 
 from .forms import LoginForm, SignUpForm
 from .models import FriendShip
@@ -55,25 +55,21 @@ class UserProfileView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = get_object_or_404(User, username=self.kwargs["username"])
-        context["tweet_list"] = (
+        user = self.object
+        tweet_list = (
             Tweet.objects.select_related("user")
-            .filter(user=self.object)
+            .filter(user=user)
             .annotate(like_num=Count("like"))
             .order_by("-created_at")
+            .prefetch_related(
+                Prefetch("like_set", queryset=Like.objects.filter(user=self.request.user), to_attr="liked")
+            )
         )
-        context["is_following"] = FriendShip.objects.filter(following=user, follower=self.request.user).exists()
-        context["followings_num"] = FriendShip.objects.filter(follower=self.object).count()
-        context["followers_num"] = FriendShip.objects.filter(following=self.object).count()
 
-        tweet_list = []
-        for tweet in context["tweet_list"]:
-            liked = False
-            if tweet.like_set.filter(user=self.request.user).exists():
-                liked = True
-            tweet.liked = liked
-            tweet_list.append(tweet)
         context["tweet_list"] = tweet_list
+        context["is_following"] = FriendShip.objects.filter(following=user, follower=self.request.user).exists()
+        context["followings_num"] = FriendShip.objects.filter(follower=user).count()
+        context["followers_num"] = FriendShip.objects.filter(following=user).count()
 
         return context
 
