@@ -6,7 +6,7 @@
     <p>内容 : {{ tweet.content }}</p>
     <p>作成日時 : {{ tweet.created_at }}</p>
     <p>
-      {% include "tweets/like.html" %}
+      {% include "tweets/like.html" with tweet=tweet %}
     </p>
   </div>
   {% if tweet.user == request.user %}
