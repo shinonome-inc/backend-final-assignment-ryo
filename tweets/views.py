@@ -43,13 +43,14 @@ class TweetDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "tweet"
 
     def get_queryset(self):
-        return (
+        queryset = (
             Tweet.objects.select_related("user")
+            .annotate(like_num=Count("like"))
             .prefetch_related(
                 Prefetch("like_set", queryset=Like.objects.filter(user=self.request.user), to_attr="liked")
             )
-            .annotate(like_num=Count("like"))
         )
+        return queryset
 
 
 class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
