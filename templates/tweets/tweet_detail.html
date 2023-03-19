@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
   <a href="{% url 'tweets:home' %}">ホームへ戻る</a>
   <div>
@@ -12,5 +13,5 @@
   {% if tweet.user == request.user %}
     <a href="{% url 'tweets:delete' tweet.pk %}"><button type="button">削除</button></a>
   {% endif %}
-  
+  <script src="{% static 'js/like.js' %}"></script>
 {% endblock %}

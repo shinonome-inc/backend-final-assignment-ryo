@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}プロフィール{% endblock %}
 {% block content %}
   <h1>{{ user.username }}</h1>
@@ -29,4 +30,5 @@
       <a href="{% url 'tweets:detail' tweet.pk %}">ツイート詳細</a>
     </div>
   {% endfor %}
+  <script src="{% static 'js/like.js' %}"></script>
 {% endblock %}
