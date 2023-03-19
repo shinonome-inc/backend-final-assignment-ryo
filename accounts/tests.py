@@ -1,10 +1,10 @@
+from django.conf import settings
 from django.contrib.auth import SESSION_KEY, get_user_model
 from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import FriendShip
-from mysite import settings
 from tweets.models import Tweet
 
 User = get_user_model()
