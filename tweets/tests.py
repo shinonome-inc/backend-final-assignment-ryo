@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Tweet
+from .models import Like, Tweet
 
 User = get_user_model()
 
@@ -53,9 +53,7 @@ class TestTweetCreateView(TestCase):
             status_code=302,
             target_status_code=200,
         )
-        self.assertTrue(
-            Tweet.objects.filter(content="testpost", user=self.user).exists()
-        )
+        self.assertTrue(Tweet.objects.filter(content="testpost", user=self.user).exists())
 
     def test_failure_post_with_empty_content(self):
         empty_content_post = {"content": ""}
@@ -73,11 +71,7 @@ class TestTweetCreateView(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors["content"],
-            [
-                "この値は 140 文字以下でなければなりません( "
-                + str(len(too_long_content_post["content"]))
-                + " 文字になっています)。"
-            ],
+            ["この値は 140 文字以下でなければなりません( " + str(len(too_long_content_post["content"])) + " 文字になっています)。"],
         )
 
 
@@ -96,7 +90,7 @@ class TestTweetDetailView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.context["tweet_detail"],
+            response.context["tweet"],
             self.post,
         )
 
@@ -141,23 +135,59 @@ class TestTweetDeleteView(TestCase):
         self.assertTrue(Tweet.objects.filter(content="testpost2").exists())
 
 
-class TestFavoriteView(TestCase):
+class TestLikeView(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(
+            username="testuser1",
+            email="test1@test.com",
+            password="testpassword1",
+        )
+        self.client.login(username="testuser1", password="testpassword1")
+        self.post = Tweet.objects.create(user=self.user1, content="testpost1")
+        self.url = reverse("tweets:like", kwargs={"pk": self.post.pk})
+
     def test_success_post(self):
-        pass
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Like.objects.filter(tweet=self.post, user=self.user1).exists())
 
     def test_failure_post_with_not_exist_tweet(self):
-        pass
+        url = reverse("tweets:like", kwargs={"pk": "100"})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(Like.objects.exists())
 
-    def test_failure_post_with_favorited_tweet(self):
-        pass
+    def test_failure_post_with_liked_tweet(self):
+        Like.objects.create(tweet=self.post, user=self.user1)
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Like.objects.all().count(), 1)
 
 
-class TestUnfavoriteView(TestCase):
+class TestUnlikeView(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(
+            username="testuser1",
+            email="test1@test.com",
+            password="testpassword1",
+        )
+        self.client.login(username="testuser1", password="testpassword1")
+        self.post = Tweet.objects.create(user=self.user1, content="testpost1")
+        self.like = Like.objects.create(tweet=self.post, user=self.user1)
+        self.url = reverse("tweets:unlike", kwargs={"pk": self.post.pk})
+
     def test_success_post(self):
-        pass
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Like.objects.exists())
 
     def test_failure_post_with_not_exist_tweet(self):
-        pass
+        url = reverse("tweets:unlike", kwargs={"pk": "100"})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(Like.objects.all().count(), 1)
 
-    def test_failure_post_with_unfavorited_tweet(self):
-        pass
+    def test_failure_post_with_unliked_tweet(self):
+        Like.objects.filter(tweet=self.post, user=self.user1).delete()
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 200)

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Error{% endblock %}
+{% block content %}
+  {% if messages %}
+  <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <ul class="messages">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  <a href="{{ request.META.HTTP_REFERER }}"><button type="button">戻る</button></a>
+  
+{% endblock %}

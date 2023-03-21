@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Home{% endblock %}
 {% block content %}
   <h1>Home</h1> 
@@ -8,9 +9,13 @@
     <p>投稿者 : <a href="{% url 'accounts:user_profile' tweet.user.username %}">{{ tweet.user }}</a></p>
     <p>作成日時: {{ tweet.created_at }}</p>
     <p>内容 : {{ tweet.content }}</p>
-    <a href="{% url 'tweets:detail' tweet.pk %}">詳細</a>
+    <p>
+      {% include "tweets/like.html" with tweet=tweet %}
+    </p>
+    <a href="{% url 'tweets:detail' tweet.pk %}">ツイート詳細</a>
   </div>
   {% endfor %}
   <p><a href="{% url 'tweets:create' %}"><button type="button">ツイート作成</button></a></p>
   <a href="{% url 'accounts:logout' %}">ログアウト</a>
+  <script src="{% static 'js/like.js' %}"></script>
 {% endblock %}

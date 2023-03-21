@@ -120,6 +120,10 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
@@ -130,3 +134,16 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "tweets:home"
 LOGOUT_REDIRECT_URL = "accounts:login"
+
+SQL_DEBUG = False
+
+if SQL_DEBUG:
+
+    def show_toolbar(request):
+        return True
+
+    INSTALLED_APPS += ("debug_toolbar",)
+    MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": show_toolbar,
+    }
